@@ -1,0 +1,224 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+    <title>ePDRM</title>
+    <link rel="stylesheet" type="text/css" href="css/system.css" />
+    <link rel="stylesheet" type="text/css" href="css/uikit.gradient.min.css" />
+
+    <script src='js/jquery-1.12.3.js'></script>
+    <script src="js/uikit.min.js"></script>
+    <script src='js/system.js'></script>
+    <script src='js/gmap.js'></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCuCTxm7BDjfkHgNymPC_XOZ6yB338bhPA&libraries=geometry&callback=initMap"></script>
+</head>
+
+<body>
+    <div class="menu-container">
+
+        <img src="img/pdrm-logo.png" class="imageRotateHorizontal" style="width:95%;right:calc(50% - 10px)">
+        <button href="" class="uk-button uk-icon-arrows-alt" title="Recenter Map" id="recenter" style="position:absolute;bottom:20px;right:calc(50% - 20px);border-radius:50%;height:40px;width:40px"></button>
+
+        <a href="" class="uk-icon-button uk-icon-list-ul" title="Resources List" onclick="mpvlist()" style="position:absolute;top:55%;right:calc(50% - 20px)" data-uk-modal="{target:'#resources'}"></a>
+
+        <a href="" class="uk-icon-button uk-icon-tablet" title="Pair Device" onclick="pairDevice()" style="position:absolute;top:45%;right:calc(50% - 20px);" data-uk-modal="{target:'#pair-device-container'}"></a>
+
+        <a href="" class="uk-icon-button uk-icon-plus-square-o" title="New CallCard" style="position:absolute;top:35%;right:calc(50% - 20px);" data-uk-modal="{target:'#newCC'}"></a>
+
+    </div>
+    <div id="CCstatus" onclick="printStatus()" style="position:absolute;width:40vw;background-color:#323232;color:white;top:10px;left:calc(50% - 20vw);z-index:10;padding:10px;border-radius:5px">
+        <table style="width:100%">
+            <thead>
+                <tr>
+                    <th style="text-align:center">Card ID</th>
+                    <th style="text-align:center">Assigned To</th>
+                    <th style="text-align:center">Status</th>
+                    <th style="text-align:center">Status History</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+    <div id="floating-panel" class="draggable">
+        <form class="uk-form">
+            <input id="address" type="text" value="" placeholder="e.g: Kuala Lumpur">
+            <button class="uk-button" id="submit" type="button">Search</button>
+        </form>
+    </div>
+    <div id="map"></div>
+
+
+    <div id="resources" class="uk-modal">
+        <div class="uk-modal-dialog" style="max-width:90vw">
+            <a class="uk-modal-close uk-close uk-close-alt"></a>
+            <ul class="uk-tab" data-uk-tab data-uk-switcher="{connect:'#my-id'}">
+                <li class="uk-active"><a href="">MPV</a></li>
+                <li><a href="">BIKE</a></li>
+                <li><a href="">TRUCK</a></li>
+            </ul>
+            <ul id="my-id" class="uk-switcher" style="margin-top:20px;">
+                <li>
+                    <div class="mpv" data-uk-switcher-item="0">
+                        <div id="spin" class="uk-modal-spinner"></div>
+                    </div>
+                </li>
+                <li>
+                    <a class="bike" href="" data-uk-switcher-item="1">
+                        <button class="uk-button uk-button-large uk-icon-motorcycle uk-text-bold" type="button"><span style="font-family: 'Raleway', sans-serif;"> BIKE 1</span></button>
+                    </a>
+                </li>
+                <li>
+                    <a class="truck" href="" data-uk-switcher-item="1">
+                        <button class="uk-button uk-button-large uk-icon-truck uk-text-bold" type="button"><span style="font-family: 'Raleway', sans-serif;"> TRUCK 1</span></button>
+                    </a>
+                </li>
+            </ul>
+            <!--<button class="uk-button uk-button-large uk-icon-car uk-text-bold" type="button"><span style="font-family: 'Raleway', sans-serif;"> MPV 1</span></button>
+            <button class="uk-button uk-button-large uk-icon-motorcycle uk-text-bold" type="button"><span style="font-family: 'Raleway', sans-serif;"> BIKE 1</span></button>-->
+        </div>
+    </div>
+
+    <div id="pair-device-container" class="uk-modal">
+        <div class="uk-modal-dialog">
+            <a class="uk-modal-close uk-close uk-close-alt"></a>
+            <div class="uk-modal-header">
+                <h2>Pair Device</h2></div>
+            <div id="pair-device">
+                <div class="uk-modal-spinner"></div>
+            </div>
+            <div id="qrcode">
+                <div id="qrspin" class="uk-modal-spinner"></div>
+            </div>
+            <div class="uk-modal-footer">
+                <button class="uk-button uk-button-primary" onclick='setmpv();'><span>Generate Pairing Code</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="assign-resources-container" class="uk-modal">
+        <div class="uk-modal-dialog">
+            <a class="uk-modal-close uk-close uk-close-alt"></a>
+            <div class="uk-modal-header">
+                <h2>Assign Resources</h2></div>
+            <div class="assign-content">
+                <div class="uk-modal-spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <input id="callcardid" value="" style="display:none">
+
+    <div id="newCC" class="uk-modal">
+        <div class="uk-modal-dialog">
+            <a class="uk-modal-close uk-close uk-close-alt"></a>
+            <div class="uk-modal-header">
+                <h2>New CallCard</h2></div>
+
+            <form action="" method="post" class="uk-form uk-form-horizontal" style="font-size:18px">
+                <label class="uk-form-label">Caller Name :</label>
+                <div class="uk-form-controls">
+                    <input class="uk-form-width-large" type="text" name="callername" id="name" required="required" placeholder="Please Enter Name" />
+                </div>
+
+                <label class="uk-form-label">Phone Number :</label>
+                <div class="uk-form-controls">
+                    <input class="uk-form-width-large" type="text" name="callerphoneno" id="phone" required="required" placeholder="Phone Number" />
+                </div>
+
+                <label class="uk-form-label">Incident Address :</label>
+                <div class="uk-form-controls">
+                    <textarea rows="5" class="uk-form-width-large" name="incidentaddress" id="city" required="required" placeholder="Please Enter Address"></textarea>
+                </div>
+
+                <label class="uk-form-label">Incident Latitude :</label>
+                <div class="uk-form-controls">
+                    <input class="uk-form-width-large" type="text" value="3.037037" name="incidentlat" id="lat" required="required" placeholder="Please Enter Latitude" />
+                </div>
+
+                <label class="uk-form-label">Incident Longitude :</label>
+                <div class="uk-form-controls">
+                    <input class="uk-form-width-large" type="text" value="101.786350" name="incidentlng" id="lng" required="required" placeholder="Please Enter Longitude" />
+                </div>
+                <label class="uk-form-label">Incident Details :</label>
+                <div class="uk-form-controls">
+                    <textarea rows="5" class="uk-form-width-large" name="incidentdetails" id="detail" required="required" placeholder="Please Enter Details"></textarea>
+                </div>
+            </form>
+            <div class="uk-modal-footer">
+                <div style="text-align:right">
+                    <button id="newCC-cancel" class="uk-button" type="button" onclick="cancelnew()">Cancel</button>
+                    <button id="newCC-save" class="uk-button uk-button-primary" type="button" onclick="submitnew();callcardreport()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="marker-info draggable resizable" style="position:absolute;width:25vw;background-color:#323232;color:white;top:80px;left:10px;z-index:10;padding:10px;border-radius:5px"></div>
+
+    <div class="CCcomment draggable resizable" style="position:absolute;height:310px;width:25vw;background-color:#323232;color:white;bottom:10px;left:10px;z-index:10;padding:10px;border-radius:5px">
+        <div id="resources-comment" style="background-color: gray;width: calc(100% - 6px);height: 250px;overflow-y: auto;border-radius:5px;margin-bottom:5px;padding:3px;font-size:17px">Loading...</div>
+        <form action="" method="post" class="uk-form uk-form-horizontal" style="font-size:18px">
+            <textarea style="width:80%" rows="2" class="uk-form" name="comment" id="HQ-comment" required="required" placeholder="Type comment here..."></textarea>
+
+            <button id="HQ-send" class="uk-button uk-button-primary" type="button" onclick="" style="height:50px;width:18%">Send</button>
+
+        </form>
+    </div>
+
+    <a href="#" onclick="printCCTable()" data-uk-modal="{target:'#CCtable-modal'}">
+        <div class="callcard-info" style="position:absolute;background-color:#323232;color:white;top:10px;right:calc(5% + 10px);z-index:10;padding:10px;border-radius:5px;font-size:20px"></div>
+    </a>
+
+    <div id="CCtable-modal" class="uk-modal">
+        <div class="uk-modal-dialog uk-modal-dialog-large">
+            <a class="uk-modal-close uk-close uk-close-alt"></a>
+            <table id="CCtable" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">
+                <thead>
+                    <tr>
+                        <th>Card ID</th>
+                        <th>Incident Details</th>
+                        <th>Assigned To</th>
+                        <th>Assigned Time</th>
+                        <th>Status</th>
+                        <th style="text-align:center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="CC-image" style="position:absolute;max-width:70vw;height:10vh;max-height:150px;background-color:#323232;color:white;bottom:10px;left:45%;z-index:10;padding:10px;border-radius:5px"></div>
+
+    <!--<div class="map-legend" style="position:absolute;width:13vw;height:16vh;background-color:transparent;color:black;bottom:15px;right:40px;z-index:10;padding:10px;border-radius:5px;font-size:12px">
+        <ul><b>Legend</b>
+            <li><img src="http://maps.google.com/mapfiles/ms/icons/blue-dot.png">Station's MPV</li>
+            <li><img src="http://maps.google.com/mapfiles/ms/icons/yellow-dot.png">Other Station's MPV</li>
+            <li><img src="http://maps.google.com/mapfiles/ms/icons/red-dot.png">CallCard</li>
+        </ul>
+    </div>-->
+
+    <div id="notification" style="position:absolute;bottom:100px;right:150px;color:white;background-color:#323232;border-radius:5px;z-index:1000000;padding:15px">I'm a Toast</div>
+
+    <div id="CCstatus-modal" class="uk-modal">
+        <div class="uk-modal-dialog uk-modal-dialog">
+            <a class="uk-modal-close uk-close uk-close-alt"></a>
+            <div class="uk-modal-header">
+                <h2>Change Status</h2></div>
+            <div id="status-content"></div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>
