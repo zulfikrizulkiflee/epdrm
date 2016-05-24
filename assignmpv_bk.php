@@ -4,14 +4,14 @@ include('dbconn.php');
 
 $callcardid = $_POST['callcardid'];
 
-$sql="SELECT * FROM mers_user ORDER BY userid";
+$sql="SELECT * FROM mers_user WHERE stationid = 1 ORDER BY userid";
 $result=mysqli_query($con,$sql);
     
 echo "<form>"; // list box select command
 
 foreach ($con->query($sql) as $row){//Array or records stored in $row
 
-echo "<a href='#' onclick='assignmpv($row[userid]);'><img src='$row[urlprofilepic]' id='user' value='$row[userid]' style='margin-left:20px;height:50px;width:50px;border-radius:50%'>$row[fullname]</a>";
+echo "<a href='#' onclick='assignmpv($row[userid]);'><img src='$row[urlprofilepic]' id='user' value='$row[userid]' style='margin-left:20px;height:50px;width:50px;border-radius:5px'>$row[fullname]</a>";
 /* Option values are added by looping through the array */ 
 }
 

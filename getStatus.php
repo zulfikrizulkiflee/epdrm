@@ -53,13 +53,13 @@ while( $row = mysqli_fetch_assoc( $result ) ){
     
     echo "<tr><td class='id' style='text-align:center'>{$row['callcardid']}</td><td style='text-align:center'>{$row['fullname']}</td><td style='background-color:$color;text-align:center;color:$fontcolor;font-weight:bold'>{$row['statusdesc']}</td><td>
     
-    <center><a href='' class='uk-icon-button uk-icon-history' onclick='changeStatus({$row['callcardid']})' data-uk-modal='{target:'#status-change'}'></a><center>
+    <center><button title='History' class='uk-button uk-icon-history' data-uk-modal={target:'#CCstatus-modal'} onclick='changeStatus({$row['callcardid']})'></button><center>
     
     </td></tr>";
 }
 
 // Free result set
-mysqli_free_result($result);
+//mysqli_free_result($result);
 
 mysqli_close($con);
 ?>

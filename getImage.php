@@ -24,7 +24,7 @@
         $crtime = $row['createdtime'];
         $photofrom = $row['photofrom'];
         
-        $mystr =  $mystr."<a href='#'><img src='http://52.76.166.8/epdrm/upload/{$row['filename']}' onclick=zoomImage('". $urlimg ."','". $callcardid."','".$crdate."','".$crtime."','".$photofrom."') style='height:10vh;width:100px;margin-right:5px;border-width:3px;border-color:white;border-style:solid'></a>";
+        $mystr =  $mystr."<a href='#my-id' data-uk-modal><img src='http://52.76.166.8/epdrm/upload/{$row['filename']}' style='height:10vh;width:100px;margin-right:5px;border-width:3px;border-color:white;border-style:solid'></a>";
         
         
     }

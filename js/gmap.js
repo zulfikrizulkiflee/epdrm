@@ -9,7 +9,7 @@ var directionsService;
 var directionsDisplay;
 var distance;
 var mpvinfowindow;
-
+var mpvprevid;
 
 
 $('document').ready(function () {
@@ -160,7 +160,7 @@ function drawMPVmarker(map) {
     directionsDisplay = new google.maps.DirectionsRenderer;
     //Start calling MPV data from db
     $.ajax({
-        url: 'getmpvlocation.php',
+        url: 'http://52.76.166.8/epdrm/mapscreenv2/getmpvlocation.php',
         data: {
             'action': 'go_ajax',
             'fn': 'spw_autosuggest',
@@ -173,6 +173,7 @@ function drawMPVmarker(map) {
             });
 
             for (var i = 0; i < data.length; i++) {
+                var userid = "" + data[i].userid;
                 var mpvlat = "" + data[i].lat;
                 var mpvlng = "" + data[i].lng;
                 var mpvfullname = "" + data[i].fullname;
@@ -192,7 +193,7 @@ function drawMPVmarker(map) {
 
                 var mpvicon = "";
                 if (mpvstationid == 1) {
-                    mpvicon = 'img/police-car.png';
+                    mpvicon = 'img/transport.png';
                 } else {
                     mpvicon = ' '; //'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png';
                 }
@@ -209,6 +210,7 @@ function drawMPVmarker(map) {
     var tableFirebaseRef = new Firebase('https://epdrmtable.firebaseio.com/');
     tableFirebaseRef.child("dataMpvTracking/fulldata").on("value", function (snapshot) {
         console.log("move");
+        var tx = Math.random();
         var fulldata = snapshot.val();
         var arr = fulldata.split('|');
         var id = arr[0];
@@ -216,7 +218,7 @@ function drawMPVmarker(map) {
         var lng = arr[2];
         var ccid = arr[3];
         var fullname = arr[4];
-        var mpvicon = 'img/police-car.png';
+        var mpvicon = 'img/transport.png?tx=' + tx;
         //mpvmarker[id].setMap(null);
 
         for (var i = 0; i < arr.length; i++)
@@ -228,28 +230,75 @@ function drawMPVmarker(map) {
                         }
                         ];
         var mpvcoord = new google.maps.LatLng(lat, lng);
-        drawMarkerOnly(mpvcoord, map, fullname, mpvicon, mpvinfowindow, lat, lng, directionsService, directionsDisplay);
+        drawMarkerOnly(mpvcoord, map, fullname, mpvicon, mpvinfowindow, lat, lng, directionsService, directionsDisplay, id);
 
         //console.log("" + mpvcoord);
     });
     //end getting mpv location from firebase
 }
 
-function drawMarkerOnly(mpvcoord, map, mpvfullname, mpvicon, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay) {
-    mpvmarker = new google.maps.Marker({
-        position: mpvcoord,
-        map: map,
-        title: mpvfullname,
-        icon: mpvicon
-    });
-    bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay);
+function drawMarkerOnly(mpvcoord, map, mpvfullname, mpvicon, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay, id) {
+    if (id != "") {
+        mpvmarker = new google.maps.Marker({
+            position: mpvcoord,
+            map: map,
+            title: mpvfullname,
+            icon: mpvicon
+        });
+
+        //bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay);
+        mpvmarker.addListener('click', function () {
+            $('#CCstatus').hide();
+            $('.CCcomment').hide();
+            //alert(mpvlat);
+            $('.marker-info').html("Name: " + mpvfullname + "<br>Coordinate: " + mpvcoord);
+            $('.marker-info').show();
+            mpvinfowindow.setContent(mpvfullname);
+            mpvinfowindow.open(map, mpvmarker);
+            //calculateAndDisplayRoute('', '', mpvlat, mpvlng, '');
+            //map.panTo(mpvcoord);
+            //map.setZoom(15);
+
+            var mpvlatrec = mpvlat;
+            var mpvlngrec = mpvlng;
+            var mpvloc = mpvlatrec + "," + mpvlngrec;
+
+            directionsService.route({
+                origin: mpvloc,
+                destination: "3.139172, 101.68685499999992",
+                // Note that Javascript allows us to access the constant
+                // using square brackets and a string value as its
+                // "property."
+                travelMode: google.maps.TravelMode.DRIVING
+            }, function (response, status) {
+                if (status == google.maps.DirectionsStatus.OK) {
+                    directionsDisplay.setDirections(response);
+                    //alert(response.routes[0].legs[0].distance.value / 1000);
+                } else {
+                    UIkit.modal.alert('Directions request failed due to ' + status);
+                }
+            });
+            directionsDisplay.setMap(map);
+            directionsDisplay.setOptions({
+                suppressMarkers: true
+            });
+        });
+
+        map.addListener('click', function () {
+            mpvinfowindow.close();
+            $('.marker-info').hide();
+            $('.marker-info').html("");
+            $('.CC-image').hide();
+            $('.CC-image').html("");
+        });
+    }
 }
 
 //Start Generate CCmarker
 function drawCCmarker(map, bangsar) {
     //Start calling Callcard data
     $.ajax({
-        url: 'getCallCardCoord.php',
+        url: 'http://52.76.166.8/epdrm/mapscreenv2/getCallCardCoord.php',
         data: {
             'action': 'go_ajax',
             'fn': 'spw_autosuggest',
@@ -351,7 +400,7 @@ function bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfow
 //End callcard listener
 
 //Start MPV listener
-function bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay) {
+/*function bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay) {
     mpvmarker.addListener('click', function () {
         $('#CCstatus').hide();
         $('.CCcomment').hide();
@@ -397,14 +446,15 @@ function bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow,
         $('.CC-image').html("");
     });
 }
-//End MPV listener
+//End MPV listener*/
 
 //Start find nearest resources
 function nearestResources(incidentcoords) {
     mapvarrnear = [];
 
     for (i = 0; i < mpvarr.length; i++) {
-        var distance = 3.456;
+        //var distance = 3.456;
+        var distance = google.maps.geometry.spherical.computeDistanceBetween(mpvarr[i], incidentcoords) / 1000;
         mpvarrnear[i] = distance;
     }
 }

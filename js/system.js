@@ -14,7 +14,7 @@ $(function () {
 var report = "";
 $.ajax({
     type: "POST",
-    url: "reportTable.php",
+    url: "http://52.76.166.8/epdrm/mapscreenv2/reportTable.php",
     success: function (response) {
         $('.callcard-info').html(response);
     }
@@ -23,7 +23,7 @@ $.ajax({
 function printCCTable() {
     $.ajax({
         type: "POST",
-        url: "getTable.php",
+        url: "http://52.76.166.8/epdrm/mapscreenv2/getTable.php",
         success: function (response) {
             $('#CCtable tbody').html(response);
         }
@@ -33,7 +33,7 @@ function printCCTable() {
 function mpvlist() {
     $.ajax({
         type: "POST",
-        url: "mpvlocatorajax.php",
+        url: "http://52.76.166.8/epdrm/mapscreenv2/mpvlocatorajax.php",
         success: function (response) {
             $('.mpv').html(response);
         }
@@ -44,7 +44,7 @@ function deleteCC(callcardid) {
     UIkit.modal.confirm("<span style='font-size:18px'>Delete CallCard with ID: " + callcardid + "</span>", function () {
         $.ajax({
             type: "POST",
-            url: "deleteCC.php",
+            url: "http://52.76.166.8/epdrm/mapscreenv2/deleteCC.php",
             data: {
                 "callcardid": callcardid
             },
@@ -59,7 +59,7 @@ function deleteCC(callcardid) {
 function loadCC() {
     $.ajax({
         type: "POST",
-        url: "getTable.php",
+        url: "http://52.76.166.8/epdrm/mapscreenv2/getTable.php",
         success: function (response) {
             $('#CCtable tbody').html(response);
         }
@@ -76,7 +76,7 @@ function submitnew() {
 
     $.ajax({
         type: 'POST',
-        url: 'newcallcard.php',
+        url: 'http://52.76.166.8/epdrm/mapscreenv2/newcallcard.php',
         data: {
             name: name,
             phone: phone,
@@ -113,7 +113,7 @@ function callcardreport() {
     var report = "";
     $.ajax({
         type: "POST",
-        url: "reportTable.php", //here goes your php script file where you want to pass value
+        url: "http://52.76.166.8/epdrm/mapscreenv2/reportTable.php", //here goes your php script file where you want to pass value
         success: function (response) {
             $('.callcard-info').html(response);
         }
@@ -136,7 +136,7 @@ function cancelnew() {
 function openImg(callcardid) {
     $.ajax({
         type: "POST",
-        url: 'getImage.php',
+        url: 'http://52.76.166.8/epdrm/mapscreenv2/getImage.php',
         data: {
             'callcardid': callcardid
         },
@@ -154,7 +154,7 @@ function openImg(callcardid) {
 function pairDevice() {
     $.ajax({
         type: "POST",
-        url: 'pairdevice.php',
+        url: 'http://52.76.166.8/epdrm/mapscreenv2/pairdevice.php',
         success: function (response) {
             $('#pair-device').html("");
             //console.log(response);
@@ -173,7 +173,7 @@ function setmpv() {
 function printStatus(callcardid) {
     $.ajax({
         type: "POST",
-        url: 'getStatus.php',
+        url: 'http://52.76.166.8/epdrm/mapscreenv2/getStatus.php',
         data: {
             callcardid: callcardid
         },
@@ -189,7 +189,7 @@ function assigntrigger(callcardid) {
     //alert($("#callcardid").val());
     $.ajax({
         type: "POST",
-        url: 'assignmpv_bk.php',
+        url: 'http://52.76.166.8/epdrm/mapscreenv2/assignmpv_bk.php',
         data: {
             callcardid: callcardid
         },
@@ -202,17 +202,34 @@ function assigntrigger(callcardid) {
 }
 
 function changeStatus(callcardid) {
-    $("#callcardid").val(callcardid);
     $.ajax({
         type: "POST",
-        url: 'statuschange.php',
+        url: 'http://52.76.166.8/epdrm/mapscreenv2/statuschange.php',
         data: {
             callcardid: callcardid
         },
         success: function (response) {
-            console.log(response);
             $('#status-content').html(response);
+        }
+    });
+}
 
+function updateStatus(statusid, callcardid) {
+    var TX = Math.random();
+    $.ajax({
+        type: "POST",
+        url: 'http://52.76.166.8/epdrm/mapscreenv2/updatestatus.php?TX=' + TX,
+        data: {
+            callcardid: callcardid,
+            statusid: statusid
+        },
+        success: function (response) {
+            var tableFirebaseRef = new Firebase('https://epdrmtable.firebaseio.com/');
+            tableFirebaseRef.update({
+                newstatusinserted: {
+                    indicate: TX
+                }
+            })
         }
     });
 }

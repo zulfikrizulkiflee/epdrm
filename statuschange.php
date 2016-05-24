@@ -5,17 +5,17 @@ $username = "awsdb";
 $password = "awsdb_2015";
 $dbname = "epdrm_usr";
 
-$conn=mysqli_connect("$servername","$username","$password","$dbname");
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 // Check connection
-if (mysqli_connect_errno())
-  {
-  echo "Failed to connect to MySQL: " . mysqli_connect_error();
-  }
+if ($conn->connect_error) {
+die("Connection failed: " . $conn->connect_error);
+}
 
 //$sql="SELECT * FROM mers_callcard a JOIN mers_status b ON a.callcardid = b.callcardid JOIN mers_lkp_status c ON b.statusid = c.statusid ORDER BY b.logdatetime DESC";
 //$ccid=$_POST['callcardid'];
 
-$callcardid = $_REQUEST['callcardid'];
+$callcardid = $_POST['callcardid'];
 
 $duration = "-1";
 
@@ -139,10 +139,6 @@ while ($row0 = mysqli_fetch_array($result0))
                         //echo "{$row4['statusdesc']}&nbsp&nbsp{$row4['logdatetime']},{$row4['duration']}<br>";
 
                     }
-
-
-
-
         }    
     
         if ($adastatus == 0)
