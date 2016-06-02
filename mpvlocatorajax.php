@@ -45,20 +45,20 @@ foreach ($con->query($sql) as $row){//Array or records stored in $row
              foreach ($con->query($sql3) as $row3){
             //if ($row3 = mysqli_fetch_array($result3)) {
                      $r3 = $r3 + 1;
-                     $mystring = $mystring . "<button class='uk-button uk-button-large uk-icon-car uk-text-bold' style='height:80px;margin:5px;width:18vw' type='button' onclick=getlocation({$userid_X},'{$row2['callcardid']}')><span style='font-family: 'Raleway, sans-serif;'> {$fullname_X}<br>Now Attend: ". $row2['callcardid'] . "<br>Current Status: " . $row3['statusdesc'] ."</span></button>";
+                     $mystring = $mystring . "<button class='uk-button uk-button-large uk-icon-car uk-text-bold' style='height:80px;margin:5px;width:17vw;max-width:17vw' type='button' onclick=getlocation({$userid_X},'{$row2['callcardid']}')><span style='font-family: 'Raleway, sans-serif;'> {$fullname_X}<br>Now Attend: ". $row2['callcardid'] . "<br>Current Status: " . $row3['statusdesc'] ."</span></button>";
                  
                 // echo "HASNOLLL";
                         /* Option values are added by looping through the array */ 
              }
             if ($r3 == 0)
             {
-                $mystring = $mystring . "<button class='uk-button uk-button-large uk-icon-car uk-text-bold' style='height:80px;margin:5px' type='button' onclick=getlocation({$userid_X},'{$row2['callcardid']}')><span style='font-family: 'Raleway, sans-serif;'> {$fullname_X}</span></button>";
+                $mystring = $mystring . "<button class='uk-button uk-button-large uk-icon-car uk-text-bold' style='height:80px;margin:5px;width:17vw;max-width:17vw' type='button' onclick=getlocation({$userid_X},'{$row2['callcardid']}')><span style='font-family: 'Raleway, sans-serif;'> {$fullname_X}</span></button>";
             }
          
     }
      if ($r2 == 0)
             {
-                $mystring = $mystring . "<button class='uk-button uk-button-large uk-icon-car uk-text-bold' style='height:80px;margin:5px' type='button' onclick=getlocation({$userid_X},'')><span style='font-family: 'Raleway, sans-serif;'> {$fullname_X}</span></button>";
+                $mystring = $mystring . "<button class='uk-button uk-button-large uk-icon-car uk-text-bold' style='height:80px;margin:5px;width:17vw;max-width:17vw' type='button' onclick=getlocation({$userid_X},'')><span style='font-family: 'Raleway, sans-serif;'> {$fullname_X}</span></button>";
          
             }
     
@@ -67,7 +67,7 @@ foreach ($con->query($sql) as $row){//Array or records stored in $row
 
 if ($r1 == 0)
             {
-                $mystring = $mystring . "<button class='uk-button uk-button-large uk-icon-car uk-text-bold' style='height:80px;margin:5px' type='button' onclick=getlocation({$userid_X},'')><span style='font-family: 'Raleway, sans-serif;'> {$row[fullname]}</span></button>";
+                $mystring = $mystring . "<button class='uk-button uk-button-large uk-icon-car uk-text-bold' style='height:80px;margin:5px;width:17vw;max-width:17vw' type='button' onclick=getlocation({$userid_X},'')><span style='font-family: 'Raleway, sans-serif;'> {$row[fullname]}</span></button>";
             }
 
 

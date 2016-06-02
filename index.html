@@ -9,12 +9,14 @@
     <link rel="stylesheet" type="text/css" href="css/system.css" />
     <link rel="stylesheet" type="text/css" href="css/uikit.gradient.min.css" />
 
+    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+
     <script src='js/jquery-1.12.3.js'></script>
     <script src="js/uikit.min.js"></script>
-    <script src='js/system.js'></script>
     <script src='js/gmap.js'></script>
+    <script src='js/system.js'></script>
+
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCuCTxm7BDjfkHgNymPC_XOZ6yB338bhPA&libraries=geometry&callback=initMap"></script>
 </head>
 
@@ -31,7 +33,7 @@
         <a href="" class="uk-icon-button uk-icon-plus-square-o" title="New CallCard" style="position:absolute;top:35%;right:calc(50% - 20px);" data-uk-modal="{target:'#newCC'}"></a>
 
     </div>
-    <div id="CCstatus" onclick="printStatus()" style="position:absolute;width:40vw;background-color:#323232;color:white;top:10px;left:calc(50% - 20vw);z-index:10;padding:10px;border-radius:5px">
+    <div id="CCstatus" style="position:absolute;width:40vw;background-color:#323232;color:white;top:10px;left:calc(50% - 20vw);z-index:10;padding:10px;border-radius:5px">
         <table style="width:100%">
             <thead>
                 <tr>
@@ -39,19 +41,18 @@
                     <th style="text-align:center">Assigned To</th>
                     <th style="text-align:center">Status</th>
                     <th style="text-align:center">Status History</th>
+                    <th style="text-align:center">Duration</th>
                 </tr>
             </thead>
-            <tbody>
-
-            </tbody>
+            <tbody></tbody>
         </table>
     </div>
-    <div id="floating-panel" class="draggable">
+    <!--<div id="floating-panel" class="draggable">
         <form class="uk-form">
             <input id="address" type="text" value="" placeholder="e.g: Kuala Lumpur">
             <button class="uk-button" id="submit" type="button">Search</button>
         </form>
-    </div>
+    </div>-->
     <div id="map"></div>
 
 
@@ -132,6 +133,11 @@
                     <input class="uk-form-width-large" type="text" name="callerphoneno" id="phone" required="required" placeholder="Phone Number" />
                 </div>
 
+                <label class="uk-form-label">Caller Location :</label>
+                <div class="uk-form-controls">
+                    <input class="uk-form-width-large" type="text" name="callerlocation" id="callerloc" required="required" placeholder="Caller location" />
+                </div>
+
                 <label class="uk-form-label">Incident Address :</label>
                 <div class="uk-form-controls">
                     <textarea rows="5" class="uk-form-width-large" name="incidentaddress" id="city" required="required" placeholder="Please Enter Address"></textarea>
@@ -197,7 +203,7 @@
         </div>
     </div>
 
-    <div class="CC-image" style="position:absolute;max-width:70vw;height:10vh;max-height:150px;background-color:#323232;color:white;bottom:10px;left:45%;z-index:10;padding:10px;border-radius:5px"></div>
+    <div class="CC-image" style="position:absolute;max-width:70vw;height:10vh;max-height:150px;background-color:#323232;color:white;bottom:10px;left:40%;z-index:999999;padding:10px;border-radius:5px"></div>
 
     <!--<div class="map-legend" style="position:absolute;width:13vw;height:16vh;background-color:transparent;color:black;bottom:15px;right:40px;z-index:10;padding:10px;border-radius:5px;font-size:12px">
         <ul><b>Legend</b>
@@ -209,10 +215,10 @@
 
     <div id="notification" style="position:absolute;bottom:100px;right:150px;color:white;background-color:#323232;border-radius:5px;z-index:1000000;padding:15px">I'm a Toast</div>
 
-    <div id="my-id" class="uk-modal">
+    <div id="image-upsize" class="uk-modal" style="overflow:hidden">
         <div class="uk-modal-dialog uk-modal-dialog-lightbox">
-            <a href="" class="uk-modal-close uk-close uk-close-alt"></a>
-            <img src="https://pixabay.com/static/uploads/photo/2015/10/01/21/39/background-image-967820_960_720.jpg" alt="">
+            <a class="uk-modal-close uk-close uk-close-alt"></a>
+            <div class="image-lightcont"></div>
         </div>
     </div>
 

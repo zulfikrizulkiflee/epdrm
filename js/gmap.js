@@ -1,4 +1,5 @@
 var map;
+var bangsar;
 var infoWindow;
 var marker;
 var mpvmarkerarr = [];
@@ -10,6 +11,7 @@ var directionsDisplay;
 var distance;
 var mpvinfowindow;
 var mpvprevid;
+var prioritymarker = [];
 
 
 $('document').ready(function () {
@@ -75,7 +77,7 @@ function initMap() {
   ];
 
     // Start Construct geofencing.
-    var bangsar = new google.maps.Polygon({
+    bangsar = new google.maps.Polygon({
         paths: bangsarCoords,
         strokeColor: '#FF0000',
         strokeOpacity: 0.8,
@@ -100,7 +102,8 @@ function initMap() {
     // End Construct geofencing.
 
     drawCCmarker(map, bangsar);
-    drawMPVmarker(map);
+    dbMPVmarker(map);
+    fbMPVmarker(map);
 
     //Start map listener
     map.addListener('dblclick', function (e) {
@@ -148,26 +151,27 @@ function initMap() {
     });
     //End Map listener
 
-    document.getElementById('submit').addEventListener('click', function () {
+    /*document.getElementById('submit').addEventListener('click', function () {
         geocodeSearchAddress(geocoder, map);
-    });
-
+    });*/
 }
 //End initialize map
 
-function drawMPVmarker(map) {
+function dbMPVmarker(map) {
     directionsService = new google.maps.DirectionsService;
     directionsDisplay = new google.maps.DirectionsRenderer;
     //Start calling MPV data from db
     $.ajax({
+        type: 'GET',
         url: 'http://52.76.166.8/epdrm/mapscreenv2/getmpvlocation.php',
         data: {
             'action': 'go_ajax',
             'fn': 'spw_autosuggest',
         },
         dataType: 'JSON',
+        //timeout: 1000,
         success: function (data) {
-            //console.log(data);
+            console.log("timeout");
             mpvinfowindow = new google.maps.InfoWindow({
                 content: ""
             });
@@ -188,6 +192,8 @@ function drawMPVmarker(map) {
 
                 var mpvcoord = new google.maps.LatLng(mpvlat, mpvlng);
 
+                mpvprevid = userid;
+
                 mpvarr.push(mpvcoord);
                 mpvarrname.push(mpvfullname);
 
@@ -198,6 +204,8 @@ function drawMPVmarker(map) {
                     mpvicon = ' '; //'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png';
                 }
 
+                drawMarkerOnly(mpvcoord, map, mpvfullname, mpvicon, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay, userid);
+
                 //drawMarkerOnly('', '', '', mpvicon, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay);
 
             }
@@ -206,11 +214,20 @@ function drawMPVmarker(map) {
     });
     //End calling MPV data
 
+
+}
+
+function fbMPVmarker(map) {
     //obtain mpv location from firebase
     var tableFirebaseRef = new Firebase('https://epdrmtable.firebaseio.com/');
     tableFirebaseRef.child("dataMpvTracking/fulldata").on("value", function (snapshot) {
-        console.log("move");
+        console.log("moved");
         var tx = Math.random();
+        var imagempv = {
+            url: 'img/transport.png?tx=' + tx,
+            //scaledSize: new google.maps.Size(60, 60)
+        };
+
         var fulldata = snapshot.val();
         var arr = fulldata.split('|');
         var id = arr[0];
@@ -218,7 +235,7 @@ function drawMPVmarker(map) {
         var lng = arr[2];
         var ccid = arr[3];
         var fullname = arr[4];
-        var mpvicon = 'img/transport.png?tx=' + tx;
+        var mpvicon = imagempv;
         //mpvmarker[id].setMap(null);
 
         for (var i = 0; i < arr.length; i++)
@@ -238,16 +255,19 @@ function drawMPVmarker(map) {
 }
 
 function drawMarkerOnly(mpvcoord, map, mpvfullname, mpvicon, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay, id) {
+    if (id != "" && id == mpvprevid) {
+
+    }
     if (id != "") {
         mpvmarker = new google.maps.Marker({
             position: mpvcoord,
             map: map,
             title: mpvfullname,
-            icon: mpvicon
+            icon: mpvicon,
         });
 
-        //bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay);
-        mpvmarker.addListener('click', function () {
+        bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay);
+        /*mpvmarker.addListener('click', function () {
             $('#CCstatus').hide();
             $('.CCcomment').hide();
             //alert(mpvlat);
@@ -259,7 +279,7 @@ function drawMarkerOnly(mpvcoord, map, mpvfullname, mpvicon, mpvinfowindow, mpvl
             //map.panTo(mpvcoord);
             //map.setZoom(15);
 
-            var mpvlatrec = mpvlat;
+            /*var mpvlatrec = mpvlat;
             var mpvlngrec = mpvlng;
             var mpvloc = mpvlatrec + "," + mpvlngrec;
 
@@ -290,7 +310,7 @@ function drawMarkerOnly(mpvcoord, map, mpvfullname, mpvicon, mpvinfowindow, mpvl
             $('.marker-info').html("");
             $('.CC-image').hide();
             $('.CC-image').html("");
-        });
+        });*/
     }
 }
 
@@ -328,19 +348,28 @@ function drawCCmarker(map, bangsar) {
 
                     var incidentcoord = new google.maps.LatLng(incidentlat, incidentlng);
 
+                    //console.log("" + incidentcoord);
+
                     cc = incidentcoord;
 
                     var titlestr = "CallCard ID: " + callcardid + " Received Time: " + receiveddatetime;
 
                     //nearestResources(incidentcoord, '');
+                    var imagemarker = {
+                        url: 'img/pulse.gif',
+                        origin: new google.maps.Point(0, 0),
+                        anchor: new google.maps.Point(25, 25),
+                        scaledSize: new google.maps.Size(80, 80)
+                    };
 
                     ccmarker = new google.maps.Marker({
                         position: cc,
                         map: map,
-                        icon: "img/file.png",
-                        title: titlestr
+                        icon: imagemarker,
+                        title: titlestr,
+                        optimized: false
                     });
-                    ccmarker.setMap(map);
+                    //ccmarker.setMap(map);
                     bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfowindow, incidentlat, incidentlng, callcardid);
                 }
             }
@@ -348,6 +377,19 @@ function drawCCmarker(map, bangsar) {
     });
 }
 //End generate CCmarker
+
+var tableFirebaseRef = new Firebase('https://epdrmtable.firebaseio.com/');
+tableFirebaseRef.child("newrowinserted").on("child_changed", function (snapshot) {
+    console.log("test");
+    //initMap();
+    drawCCmarker(map, bangsar);
+});
+tableFirebaseRef.child("rowclosed").on("child_changed", function (snapshot) {
+    console.log("test");
+    //initMap();
+    ccmarker.setMap(null);
+    drawCCmarker(map, bangsar);
+});
 
 //Start callcard listener
 function bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfowindow, incidentlat, incidentlng, callcardid) {
@@ -400,7 +442,7 @@ function bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfow
 //End callcard listener
 
 //Start MPV listener
-/*function bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay) {
+function bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay) {
     mpvmarker.addListener('click', function () {
         $('#CCstatus').hide();
         $('.CCcomment').hide();
@@ -413,7 +455,7 @@ function bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfow
         //map.panTo(mpvcoord);
         //map.setZoom(15);
 
-        var mpvlatrec = mpvlat;
+        /*var mpvlatrec = mpvlat;
         var mpvlngrec = mpvlng;
         var mpvloc = mpvlatrec + "," + mpvlngrec;
 
@@ -435,7 +477,7 @@ function bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfow
         directionsDisplay.setMap(map);
         directionsDisplay.setOptions({
             suppressMarkers: true
-        });
+        });*/
     });
 
     map.addListener('click', function () {
@@ -509,7 +551,7 @@ function showCC(callcardid, incidentlat, incidentlng) {
         status.show();
     }*/
     map.panTo(incidentcoord);
-    map.setZoom(15);
+    map.setZoom(18);
 }
 
 //chat system
@@ -531,7 +573,7 @@ function chatsystem(callcardid) {
                             noticallcard.play();
                             $('#notification').html("New Message Received");
                             $('#notification').show().delay(5000).fadeOut();
-                            $('#resources-comment').append("<b>" + data.child('sentby').val() + "</b>: " + data.child('msg').val() + "<br><span style='font-size:11px;'>" + data.child('sentdatetime').val() + "</span><br><br>");
+                            $('#resources-comment').append("<div><b>" + data.child('sentby').val() + "</b>: " + data.child('msg').val() + "<br><span style='font-size:11px;'>" + data.child('sentdatetime').val() + "</span></div><br><br>");
                             $('#resources-comment').scrollTop($('#resources-comment')[0].scrollHeight);
                         }
                     }
@@ -539,6 +581,7 @@ function chatsystem(callcardid) {
             });
         }
     });
+
 
 
     $('#HQ-send').click(function () {

@@ -51,11 +51,15 @@ while( $row = mysqli_fetch_assoc( $result ) ){
         $fontcolor="black";
     }
     
-    echo "<tr><td class='id' style='text-align:center'>{$row['callcardid']}</td><td style='text-align:center'>{$row['fullname']}</td><td style='background-color:$color;text-align:center;color:$fontcolor;font-weight:bold'>{$row['statusdesc']}</td><td>
+    echo "<tr><td class='id' style='text-align:center'>{$row['callcardid']}</td><td style='text-align:center'>{$row['fullname']}</td><td id='stats' style='background-color:$color;text-align:center;color:$fontcolor;font-weight:bold'>{$row['statusdesc']}</td><td>
     
-    <center><button title='History' class='uk-button uk-icon-history' data-uk-modal={target:'#CCstatus-modal'} onclick='changeStatus({$row['callcardid']})'></button><center>
+    <center><button title='History' class='uk-button uk-icon-history' data-uk-modal={target:'#CCstatus-modal'} onclick='changeStatus({$row['callcardid']});'></button><center>
     
-    </td></tr>";
+    </td>
+    
+    <td><center><time>00:00:00</time></center></td>
+    
+    </tr>";
 }
 
 // Free result set

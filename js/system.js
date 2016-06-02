@@ -49,7 +49,15 @@ function deleteCC(callcardid) {
                 "callcardid": callcardid
             },
             success: function (response) {
+                var TX = Math.random();
+                var tableFirebaseRef = new Firebase('https://epdrmtable.firebaseio.com/');
+                tableFirebaseRef.update({
+                    rowclosed: {
+                        indicate: TX
+                    }
+                });
                 $('#CCtable tbody').html("");
+                callcardreport();
                 loadCC();
             }
         });
@@ -69,6 +77,7 @@ function loadCC() {
 function submitnew() {
     var name = $('#name').val();
     var phone = $('#phone').val();
+    var callerloc = $('#callerloc').val();
     var city = $('#city').val();
     var lat = $('#lat').val();
     var lng = $('#lng').val();
@@ -80,18 +89,27 @@ function submitnew() {
         data: {
             name: name,
             phone: phone,
+            callerloc: callerloc,
             city: city,
             lat: lat,
             lng: lng,
             detail: detail
         },
         success: function (response) {
+            var TX = Math.random();
+            var tableFirebaseRef = new Firebase('https://epdrmtable.firebaseio.com/');
+            tableFirebaseRef.update({
+                newrowinserted: {
+                    indicate: TX
+                }
+            });
             var noticallcard = new Audio('audio/notificationcallcard.mp3');
             noticallcard.play();
             $('#notification').html("New CallCard Received");
             $('#notification').show().delay(5000).fadeOut();
             var name = $('#name').val("");
             var phone = $('#phone').val("");
+            var callerloc = $('#callerloc').val("");
             var city = $('#city').val("");
             //var lat = $('#lat').val("");
             //var lng = $('#lng').val("");
@@ -102,7 +120,7 @@ function submitnew() {
             } else {
                 modal.show();
             }
-            drawCCmarker();
+
         }
     });
 
@@ -133,6 +151,9 @@ function cancelnew() {
     }
 }
 
+var callcardidsemasa = '';
+var globalgambaralert = 0;
+
 function openImg(callcardid) {
     $.ajax({
         type: "POST",
@@ -142,6 +163,7 @@ function openImg(callcardid) {
         },
         success: function (response) {
             //console.log(response);
+            callcardidsemasa = callcardid;
             if (response != "") {
                 $('.CC-image').html(response);
                 $('.CC-image').show();
@@ -150,6 +172,27 @@ function openImg(callcardid) {
         }
     });
 }
+
+/*var tableFirebaseRef = new Firebase('https://epdrmtable.firebaseio.com/');
+tableFirebaseRef.child("newphotochanges").on("child_changed", function (snapshot) {
+    console.log("tukar gambar");
+    var noticallcard = new Audio('http://52.76.166.8/epdrm/mapscreenv2/audio/notificationcallcard.mp3');
+    noticallcard.play();
+    openImg(callcardidsemasa);
+});*/
+tableFirebaseRef.child("newphotochanges").on("value", function (snapshot) {
+    if (globalgambaralert > 0) {
+        var noticallcard = new Audio('http://52.76.166.8/epdrm/mapscreenv2/audio/notificationcallcard.mp3');
+        noticallcard.play();
+        $('#notification').html("New Image Change: CallCard " + snapshot.child('callcardid').val());
+        $('#notification').show().delay(5000).fadeOut();
+        console.log("kuar");
+    }
+    globalgambaralert = globalgambaralert + 1;
+    if (callcardidsemasa != "" && "" + callcardidsemasa != "undefined") {
+        openImg(snapshot.child("callcardid").val());
+    }
+});
 
 function pairDevice() {
     $.ajax({
@@ -178,6 +221,8 @@ function printStatus(callcardid) {
             callcardid: callcardid
         },
         success: function (response) {
+            //console.log(response);
+
             $('#CCstatus tbody').html(response);
             $('#CCstatus').show();
         }
@@ -200,6 +245,7 @@ function assigntrigger(callcardid) {
         }
     });
 }
+
 
 function changeStatus(callcardid) {
     $.ajax({
@@ -232,4 +278,46 @@ function updateStatus(statusid, callcardid) {
             })
         }
     });
+}
+
+var tableFirebaseRef = new Firebase('https://epdrmtable.firebaseio.com/');
+tableFirebaseRef.child("newstatusinserted").on("child_changed", function (snapshot) {
+    console.log("test");
+    var modal = UIkit.modal("#CCstatus-modal");
+    if (modal.isActive()) {
+        modal.hide();
+    } else {
+        modal.show();
+    }
+});
+
+/*var h1 = document.getElementsById('timerCC')[0],
+    seconds = 0,
+    minutes = 0,
+    hours = 0,
+    t;
+
+function add() {
+    seconds++;
+    if (seconds >= 60) {
+        seconds = 0;
+        minutes++;
+        if (minutes >= 60) {
+            minutes = 0;
+            hours++;
+        }
+    }
+
+    h1.textContent = (hours ? (hours > 9 ? hours : "0" + hours) : "00") + ":" + (minutes ? (minutes > 9 ? minutes : "0" + minutes) : "00") + ":" + (seconds > 9 ? seconds : "0" + seconds);
+
+    timer();
+}
+
+function timer() {
+    t = setTimeout(add, 1000);
+}
+timer();*/
+
+function imageLightbox(imgurl) {
+    $('.image-lightcont').html("<img src='" + imgurl + "'>");
 }

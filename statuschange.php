@@ -134,7 +134,7 @@ while ($row0 = mysqli_fetch_array($result0))
                             $timer = "";
                         }
                         
-                            echo "<button onclick=updateStatus({$row4['statusid']},{$callcardid}) style='width:100px;background-color:$color;font-color:$fontcolor'>{$row4['statusdesc']}</button>&nbsp&nbsp{$row4['logdatetime']}&nbsp&nbsp;{$timer}<br>";
+                            echo "<button onclick=updateStatus({$row4['statusid']},{$callcardid}) style='width:100px;height:50px;background-color:$color;font-color:$fontcolor'>{$row4['statusdesc']}</button>&nbsp&nbsp{$row4['logdatetime']}&nbsp&nbsp;{$timer}<br>";
                       
                         //echo "{$row4['statusdesc']}&nbsp&nbsp{$row4['logdatetime']},{$row4['duration']}<br>";
 
@@ -171,7 +171,7 @@ while ($row0 = mysqli_fetch_array($result0))
                             $fontcolor="black";
                         }
             $duration = "-1";
-            echo "<button onclick=updateStatus({$statusidX},{$callcardid}) style='width:100px;background-color:$color;color:$fontcolor'>{$statusdescX}</button><br>";
+            echo "<button onclick=updateStatus({$statusidX},{$callcardid});printStatus({$callcardid}); style='width:100px;height:50px;background-color:$color;color:$fontcolor'>{$statusdescX}</button><br>";
         }
     
     
