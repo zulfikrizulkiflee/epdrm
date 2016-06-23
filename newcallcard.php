@@ -13,7 +13,7 @@ die("Connection failed: " . $conn->connect_error);
 
 
 $id = mt_rand(100000,999999);
-$time = date("Y-m-d h:i:sa");
+//$time = date("Y-m-d h:i:sa");
 $name = $_POST["name"];
 $phone = $_POST["phone"];
 $callerloc = $_POST["callerloc"];
@@ -25,7 +25,7 @@ $stationid = 1;
 
     
 $sql = "INSERT INTO mers_callcard (callcardid,receiveddatetime, callername, callerphoneno, callerlocation,incidentaddress, incidentlat, incidentlng, incidentdetails,stationid,notification)
-VALUES ('$id','$time','$name','$phone','$callerloc','$city','$lat','$lng','$detail','$stationid','Y')";
+VALUES ('$id',now(),'$name','$phone','$callerloc','$city','$lat','$lng','$detail','$stationid','Y')";
 
 if ($conn->query($sql) === TRUE) {
 echo "<script type= 'text/javascript'>alert('New record created successfully');

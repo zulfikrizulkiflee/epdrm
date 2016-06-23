@@ -18,8 +18,10 @@ $ccid=$_POST['callcardid'];
 $sql="SELECT a.id, a.callcardid, a.incidentdetails, a.assignedtouserid, a.assignedtodatetime, a.incidentlat, a.incidentlng,
 (SELECT b.statusid FROM  mers_status b where b.callcardid = a.callcardid ORDER BY b. logdatetime DESC LIMIT 1) as statusid,
 (SELECT d.fullname FROM  mers_user d where d.userid = a.assignedtouserid ORDER BY a.receiveddatetime DESC LIMIT 1) as fullname,
-(SELECT c.statusdesc FROM  mers_status b , mers_lkp_status c where b.callcardid = a.callcardid 
-AND c.statusid = b.statusid ORDER BY b. logdatetime DESC LIMIT 1) as statusdesc
+(SELECT c.statusdesc FROM  mers_status b , mers_lkp_status c where b.callcardid = a.callcardid
+AND c.statusid = b.statusid ORDER BY b. logdatetime DESC LIMIT 1) as statusdesc,
+(SELECT b.logdatetime FROM  mers_status b , mers_lkp_status c where b.callcardid = a.callcardid
+AND c.statusid = b.statusid ORDER BY b. logdatetime DESC LIMIT 1) as statusstarttime
 FROM mers_callcard a WHERE callcardid = $ccid";
 $result=mysqli_query($con,$sql);
 
@@ -27,6 +29,17 @@ $result=mysqli_query($con,$sql);
 while( $row = mysqli_fetch_assoc( $result ) ){
     $color="";
     $fontcolor="";
+    
+    $duration = "00:00:00";
+    $statusstarttime = $row['statusstarttime'];
+    //cari beza
+    $mySQL3 = "SELECT TIMEDIFF(now(), '" . $statusstarttime . "') AS duration FROM DUAL";
+        $result3 = mysqli_query($con, $mySQL3);
+        if ($row3 = mysqli_fetch_array($result3))
+        {
+                //ada duration
+                $duration = $row3['duration'];
+        }
     
     if ($row['statusdesc'] == "Dispatched"){
         $color = "yellow";
@@ -51,15 +64,17 @@ while( $row = mysqli_fetch_assoc( $result ) ){
         $fontcolor="black";
     }
     
+    //echo "abc";
+    
     echo "<tr><td class='id' style='text-align:center'>{$row['callcardid']}</td><td style='text-align:center'>{$row['fullname']}</td><td id='stats' style='background-color:$color;text-align:center;color:$fontcolor;font-weight:bold'>{$row['statusdesc']}</td><td>
     
     <center><button title='History' class='uk-button uk-icon-history' data-uk-modal={target:'#CCstatus-modal'} onclick='changeStatus({$row['callcardid']});'></button><center>
     
     </td>
     
-    <td><center><time>00:00:00</time></center></td>
+    <td><center><span id='timer1'>".$duration."</span></center></td>
     
-    </tr>";
+</tr>";
 }
 
 // Free result set

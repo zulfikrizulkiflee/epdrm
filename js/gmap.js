@@ -12,6 +12,11 @@ var distance;
 var mpvinfowindow;
 var mpvprevid;
 var prioritymarker = [];
+var GLOBALmarker = [];
+var callcardidnow;
+var GLOBALCCmarker = [];
+var markerid = [];
+var markerloc = [];
 
 
 $('document').ready(function () {
@@ -255,16 +260,41 @@ function fbMPVmarker(map) {
 }
 
 function drawMarkerOnly(mpvcoord, map, mpvfullname, mpvicon, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay, id) {
-    if (id != "" && id == mpvprevid) {
-
-    }
     if (id != "") {
+        /*mpvmarker[id] = new google.maps.Marker({
+                position: location,
+                map: map,
+                icon: 'img/transport.png?tx=' + tx,
+                title: fullname,
+            });
+            //mpvmarker.setPosition(location);
+            mpvmarker[id].setMap(map);*/
+
+        if (markerid.indexOf(id) == -1) {
+            markerid.push(id);
+            markerloc.push(mpvcoord);
+        } else {
+            markerloc[(markerid.indexOf(id))] = mpvcoord;
+        }
+        //console.log("" + markerid);
+        //console.log("" + markerloc);
+
         mpvmarker = new google.maps.Marker({
             position: mpvcoord,
             map: map,
             title: mpvfullname,
             icon: mpvicon,
         });
+
+        //clearkan
+        var x = "" + GLOBALmarker[id];
+        if (x == "undefined") {} else {
+            console.log("GLOBALmarker[id]==" + GLOBALmarker[id]);
+            GLOBALmarker[id].setMap(null);
+        }
+        //setting..
+        GLOBALmarker[id] = mpvmarker;
+        mpvmarker = GLOBALmarker[id];
 
         bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow, mpvlat, mpvlng, directionsService, directionsDisplay);
         /*mpvmarker.addListener('click', function () {
@@ -314,18 +344,34 @@ function drawMarkerOnly(mpvcoord, map, mpvfullname, mpvicon, mpvinfowindow, mpvl
     }
 }
 
+var tableFirebaseRef = new Firebase('https://epdrmtable.firebaseio.com/');
+tableFirebaseRef.child("newrowinserted").on("value", function (snapshot) {
+    console.log("testabc");
+    //initMap();
+    drawCCmarker(map, bangsar);
+    callcardreport();
+});
+tableFirebaseRef.child("rowclosed").on("value", function (snapshot) {
+    console.log("test");
+    //initMap();
+    ccmarker.setMap(null);
+    drawCCmarker(map, bangsar);
+    callcardreport();
+});
+
 //Start Generate CCmarker
 function drawCCmarker(map, bangsar) {
     //Start calling Callcard data
+    tx = Math.random();
     $.ajax({
-        url: 'http://52.76.166.8/epdrm/mapscreenv2/getCallCardCoord.php',
+        url: 'http://52.76.166.8/epdrm/mapscreenv2/getCallCardCoord.php?tx=' + tx,
         data: {
             'action': 'go_ajax',
             'fn': 'spw_autosuggest',
         },
         dataType: 'JSON',
         success: function (data) {
-            //console.log(data);
+            console.log("" + data);
             var ccinfowindow = new google.maps.InfoWindow({
                 content: ""
             });
@@ -348,29 +394,31 @@ function drawCCmarker(map, bangsar) {
 
                     var incidentcoord = new google.maps.LatLng(incidentlat, incidentlng);
 
-                    //console.log("" + incidentcoord);
+                    console.log("" + incidentcoord + " -" + (i + 1));
 
-                    cc = incidentcoord;
+                    /*cc = incidentcoord;
 
                     var titlestr = "CallCard ID: " + callcardid + " Received Time: " + receiveddatetime;
 
                     //nearestResources(incidentcoord, '');
+                    //var tx = Math.random();
                     var imagemarker = {
                         url: 'img/pulse.gif',
                         origin: new google.maps.Point(0, 0),
                         anchor: new google.maps.Point(25, 25),
                         scaledSize: new google.maps.Size(80, 80)
-                    };
+                    };*/
 
-                    ccmarker = new google.maps.Marker({
+                    /*ccmarker = new google.maps.Marker({
                         position: cc,
                         map: map,
                         icon: imagemarker,
                         title: titlestr,
                         optimized: false
-                    });
+                    });*/
                     //ccmarker.setMap(map);
-                    bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfowindow, incidentlat, incidentlng, callcardid);
+                    drawCCMarkerOnly(map, receiveddatetime, incidentdetails, incidentcoord, ccinfowindow, incidentlat, incidentlng, callcardid)
+                        //bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfowindow, incidentlat, incidentlng, callcardid);
                 }
             }
         }
@@ -378,23 +426,57 @@ function drawCCmarker(map, bangsar) {
 }
 //End generate CCmarker
 
-var tableFirebaseRef = new Firebase('https://epdrmtable.firebaseio.com/');
-tableFirebaseRef.child("newrowinserted").on("child_changed", function (snapshot) {
-    console.log("test");
-    //initMap();
-    drawCCmarker(map, bangsar);
-});
-tableFirebaseRef.child("rowclosed").on("child_changed", function (snapshot) {
-    console.log("test");
-    //initMap();
-    ccmarker.setMap(null);
-    drawCCmarker(map, bangsar);
-});
+function drawCCMarkerOnly(map, receiveddatetime, incidentdetails, incidentcoord, ccinfowindow, incidentlat, incidentlng, callcardid) {
+    if (callcardid != "") {
+        /*mpvmarker[id] = new google.maps.Marker({
+                position: location,
+                map: map,
+                icon: 'img/transport.png?tx=' + tx,
+                title: fullname,
+            });
+            //mpvmarker.setPosition(location);
+            mpvmarker[id].setMap(map);*/
+
+        cc = incidentcoord;
+
+        var titlestr = "CallCard ID: " + callcardid + " Received Time: " + receiveddatetime;
+
+        //nearestResources(incidentcoord, '');
+        //var tx = Math.random();
+        var imagemarker = {
+            url: 'img/pulse.gif',
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(25, 25),
+            scaledSize: new google.maps.Size(80, 80)
+        };
+
+        ccmarker = new google.maps.Marker({
+            position: cc,
+            map: map,
+            icon: imagemarker,
+            title: titlestr,
+            optimized: false
+        });
+
+        //clearkan
+        var x = "" + GLOBALCCmarker[callcardid];
+        if (x == "undefined") {} else {
+            //console.log("GLOBALCCmarker[id]==" + GLOBALCCmarker[callcardid]);
+            GLOBALCCmarker[callcardid].setMap(null);
+        }
+        //setting..
+        GLOBALCCmarker[callcardid] = ccmarker;
+        ccmarker = GLOBALCCmarker[callcardid];
+
+        bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfowindow, incidentlat, incidentlng, callcardid);
+    }
+}
 
 //Start callcard listener
 function bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfowindow, incidentlat, incidentlng, callcardid) {
     ccmarker.addListener('click', function () {
         //alert(incidentdetails);
+        callcardidnow = callcardid;
         printStatus(callcardid);
         nearestResources(incidentcoord);
         var geocoder = new google.maps.Geocoder();
@@ -405,13 +487,21 @@ function bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfow
             lat: parseFloat(incidentlat),
             lng: parseFloat(incidentlng)
         };
+
+        /*var circle = new google.maps.Circle({
+            map: map,
+            radius: 100,
+            fillColor: '#AA0000'
+        });
+        circle.bindTo('center', ccmarker, 'position');*/
+
         geocoder.geocode({
             'location': latlng
         }, function (results, status) {
             if (status === google.maps.GeocoderStatus.OK) {
                 if (results[1]) {
                     var address = results[1].formatted_address;
-                    $('.marker-info').html("<b>Callcard Title: </b>" + incidentdetails + "<br><b>Coordinate: </b>" + incidentcoord + "<br><b>Address: </b>" + address + "<br><b>Nearest Resources: </b><ul><li>" + mpvarrname[0] + " - " + mpvarrnear[0].toFixed() + "km</li><li>" + mpvarrname[1] + " - " + mpvarrnear[1].toFixed() + "km</li><li>" + mpvarrname[2] + " - " + mpvarrnear[2].toFixed() + "km</li></ul>");
+                    $('.marker-info').html("<b>Callcard Title: </b>" + incidentdetails + "<br><b>Coordinate: </b>" + incidentcoord + "<br><b>Address: </b>" + address + "<br><b>Nearest Resources: </b><ul><li>" + mpvarrname[0] + " - " + mpvarrnear[0].toFixed() + "km</li><li>" + mpvarrname[1] + " - " + mpvarrnear[1].toFixed() + "km</li><li>" + mpvarrname[2] + " - " + mpvarrnear[2].toFixed() + "km</li></ul><button class='uk-button uk-icon-minus-square-o uk-icon-medium' title='Minimize' onclick='minimize()' style='float:right'></button>");
                 } else {
                     UIkit.modal.alert('No results found');
                 }
@@ -431,12 +521,15 @@ function bindInfoWindowCC(ccmarker, map, incidentdetails, incidentcoord, ccinfow
     });
 
     map.addListener('click', function () {
+        //circle.setMap(null);
         ccinfowindow.close();
         $('.marker-info').hide();
         $('.CCcomment').hide();
         $('.marker-info').html("");
         directionsDisplay.setMap(null);
         $('#CCstatus').hide();
+        $('#min-container').hide();
+
     });
 }
 //End callcard listener
@@ -481,7 +574,7 @@ function bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow,
     });
 
     map.addListener('click', function () {
-        mpvinfowindow.close();
+        //mpvinfowindow.close();
         $('.marker-info').hide();
         $('.marker-info').html("");
         $('.CC-image').hide();
@@ -489,6 +582,8 @@ function bindInfoWindowMPV(mpvmarker, map, mpvfullname, mpvcoord, mpvinfowindow,
     });
 }
 //End MPV listener*/
+
+
 
 //Start find nearest resources
 function nearestResources(incidentcoords) {
@@ -556,7 +651,18 @@ function showCC(callcardid, incidentlat, incidentlng) {
 
 //chat system
 function chatsystem(callcardid) {
-    //console.log(callcardid);
+    console.log(callcardid);
+    callcardidnow = callcardid;
+    var currentdate = "" + new Date().toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    }).split(' ').join(' ');
+
+    var prevdate = currentdate;
+
+    console.log(currentdate);
+
     var myFirebaseRef = new Firebase('https://epdrm.firebaseio.com/');
     myFirebaseRef.on("value", function (snapshot) {
         $('#resources-comment').html("");
@@ -568,13 +674,26 @@ function chatsystem(callcardid) {
             snapshot.forEach(function (data) {
                 if (data.child('msg').val() != "") {
                     if (data.child("callcardid").val() == callcardid) {
-                        if (data.child('sentby') != "BCC") {
+                        if (data.child('sentby').val() == "BCC") {
+                            if (data.child("sentdate").val() != prevdate) {
+                                $('#resources-comment').append("<div style='text-align:center'>" + data.child('sentdate').val() + "</div>");
+                                prevdate = data.child("sentdate").val();
+                            }
+                            $('#resources-comment').append("<div style='text-align:right'>" + data.child('msg').val() + " : <b><span style='color:aqua'>" + data.child('sentby').val() + "</span></b><br><span style='font-size:11px;'>" + data.child('senttime').val() + "</span></div><br>");
+                            $('#resources-comment').scrollTop($('#resources-comment')[0].scrollHeight);
+
+                        } else {
                             var noticallcard = new Audio('audio/notificationcallcard.mp3');
                             noticallcard.play();
                             $('#notification').html("New Message Received");
                             $('#notification').show().delay(5000).fadeOut();
-                            $('#resources-comment').append("<div><b>" + data.child('sentby').val() + "</b>: " + data.child('msg').val() + "<br><span style='font-size:11px;'>" + data.child('sentdatetime').val() + "</span></div><br><br>");
+                            if (data.child("sentdate").val() != prevdate) {
+                                $('#resources-comment').append("<div style='text-align:center'>" + data.child('sentdate').val() + "</div>");
+                                prevdate = data.child("sentdate").val();
+                            }
+                            $('#resources-comment').append("<div style='text-align:left'><b><span style='color:red'>" + data.child('sentby').val() + "</span></b>: " + data.child('msg').val() + "<br><span style='font-size:11px;'>" + data.child('senttime').val() + "</span></div><br>");
                             $('#resources-comment').scrollTop($('#resources-comment')[0].scrollHeight);
+
                         }
                     }
                 }
@@ -605,17 +724,19 @@ function chatsystem(callcardid) {
                 var currentdate = "" + jsonObj[0].currentdate;
                 var currenttime = "" + jsonObj[0].currenttime;
 
-                myFirebaseRef.push().set({
-                    'img': pic,
-                    'username': username,
-                    'msg': chat,
-                    'receivedby': 'MPV1',
-                    'sentby': username,
-                    'sentdatetime': currentdatetime,
-                    'sentdate': currentdate,
-                    'senttime': currenttime,
-                    'callcardid': callcardid
-                });
+                if (chat != "") {
+                    myFirebaseRef.push().set({
+                        'img': pic,
+                        'username': username,
+                        'msg': chat,
+                        'receivedby': 'MPV1',
+                        'sentby': username,
+                        'sentdatetime': currentdatetime,
+                        'sentdate': currentdate,
+                        'senttime': currenttime,
+                        'callcardid': callcardidnow
+                    });
+                }
             }
         });
 
@@ -644,3 +765,18 @@ function sendChatNotification() {
     });
 }
 //end chat system
+
+function getlocation(userid, callcardid) {
+    //alert(userid + "|" + callcardid);
+    var locstr = markerloc[(markerid.indexOf(userid.toString()))];
+    //console.log(locstr);
+    //var mpvlocation=new google.maps.LatLng(incidentlat, incidentlng);
+    var modal = UIkit.modal("#resources");
+    if (modal.isActive()) {
+        modal.hide();
+    } else {
+        modal.show();
+    }
+    map.panTo(locstr);
+    map.setZoom(17);
+}

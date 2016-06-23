@@ -51,7 +51,40 @@ mysqli_close($con);
             //alert(userid);
             //lert(callcardidx);
 
-            if (confirm("Assign Callcard " + callcardidx + " to " + userid + "?") == true) {
+            UIkit.modal.confirm("<span style='font-size:18px'>Assign Callcard " + callcardidx + " to " + userid + "?</span>", function () {
+                var TX = Math.random();
+                $.ajax({
+                    type: "POST",
+                    url: "http://52.76.166.8/epdrm/api_generator.php?api_name=M_ASSIGNED_MPV&TX=" + TX,
+                    data: {
+                        callcardid: callcardidx,
+                        userid: userid
+                    },
+                    cache: false,
+                    timeout: 15 * 1000,
+                    error: function (xhr, textStatus, errorThrown) {
+                        return false;
+                    },
+                    success: function (response) {
+
+                        callSiren(userid);
+                        var firebaseTable = new Firebase('https://epdrmtable.firebaseio.com/');
+
+                        firebaseTable.update({
+                            newrowinserted: {
+                                indicate: TX
+                            }
+                        });
+                    }
+                });
+                var modal = UIkit.modal("#assign-resources-container");
+                if (modal.isActive()) {
+                    modal.hide();
+                } else {
+                    modal.show();
+                }
+            });
+            /*if (confirm("Assign Callcard " + callcardidx + " to " + userid + "?") == true) {
                 var TX = Math.random();
                 $.ajax({
                     type: "POST",
@@ -85,7 +118,7 @@ mysqli_close($con);
                 }
             } else {
 
-            }
+            }*/
         }
 
 
