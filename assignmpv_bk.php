@@ -51,6 +51,17 @@ mysqli_close($con);
             //alert(userid);
             //lert(callcardidx);
 
+            $.ajax({
+                type: "POST",
+                url: "http://52.76.166.8/epdrm/mapscreenv2/resources_availability.php",
+                data: {
+                    "id": username,
+                },
+                success: function (response) {
+                    //console.log("");
+                }
+            });
+
             UIkit.modal.confirm("<span style='font-size:18px'>Assign Callcard " + callcardidx + " to " + userid + "?</span>", function () {
                 var TX = Math.random();
                 $.ajax({
